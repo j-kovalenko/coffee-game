@@ -42,17 +42,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = WIDTH / 2
         self.rect.centery = HEIGHT / 2
 
-        # self.current_speed = 0
-
     def update(self):
-        # keys = pygame.key.get_pressed()
-        #
-        # if keys[pygame.K_UP]:
-        #     self.current_speed = -self.max_speed
-        # elif keys[pygame.K_DOWN]:
-        #     self.current_speed = self.max_speed
-        # else:
-        #     self.current_speed = 0
+        self.rect.x += self.max_speed
         if self.rect.x >= 450 - 80:
             self.max_speed = -self.max_speed
             self.image = pygame.transform.flip(self.image, True, False)
@@ -64,14 +55,14 @@ class Player(pygame.sprite.Sprite):
 
 
 class Background(pygame.sprite.Sprite):
-    max_speed = -5
+    max_speed = 7
 
     def __init__(self):
         super(Background, self).__init__()
 
         self.image = load_image('fon.jpg')
         self.rect = self.image.get_rect()
-        self.rect.bottom = 450
+        self.rect.bottom = 900
 
         self.current_speed = -self.max_speed
 
@@ -80,17 +71,17 @@ class Background(pygame.sprite.Sprite):
 
         if keys[pygame.K_UP]:
             self.current_speed = self.max_speed
-        self.current_speed += 0.1
+        self.current_speed -= 0.1
         self.rect.bottom += self.current_speed
 
-        if self.rect.bottom >= 900:
-            self.rect.bottom = 450
+        if self.rect.bottom >= 1350:
+            self.rect.bottom = 900
+        if self.rect.bottom <= 450:
+            self.rect.bottom = 900
 
 
 class Kofe(pygame.sprite.Sprite):
-    cooldown = 250
-    current_cooldown = 0
-    speed = 5
+    max_speed = 7
 
     def __init__(self, x, y):
         super(Kofe, self).__init__()
@@ -103,8 +94,15 @@ class Kofe(pygame.sprite.Sprite):
 
         self.count = count
 
+        self.current_speed = -self.max_speed
+
     def update(self, count):
-        self.rect.move_ip((0, self.speed))
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_UP]:
+            self.current_speed = self.max_speed
+        self.current_speed -= 0.1
+        self.rect.bottom += self.current_speed
         for i in kofe_objects:
             if i.rect.top >= 450:
                 kofe_objects.remove(i)
