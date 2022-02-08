@@ -138,20 +138,19 @@ class Kofe(pygame.sprite.Sprite):
         self.current_speed = -self.max_speed
 
     def update(self, count):
-        global is_alive
         keys = pygame.key.get_pressed()
         if is_alive:
             if keys[pygame.K_UP]:
                 self.current_speed = self.max_speed
-            self.current_speed -= 0.1
-            self.rect.bottom += self.current_speed
-            for i in kofe_objects:
-                if i.rect.top >= 450:
-                    kofe_objects.remove(i)
-                    kofe_objects.add(Kofe(0, -450))
-            if count > len(list(kofe_objects)):
-                for i in range(count - len(list(kofe_objects))):
-                    kofe_objects.add(Kofe(0, -450))
+        self.current_speed -= 0.1
+        self.rect.bottom += self.current_speed
+        for i in kofe_objects:
+            if i.rect.top >= 450:
+                kofe_objects.remove(i)
+                kofe_objects.add(Kofe(0, -450))
+        if count > len(list(kofe_objects)):
+            for i in range(count - len(list(kofe_objects))):
+                kofe_objects.add(Kofe(0, -450))
 
 class Buttons(pygame.sprite.Sprite):
     def __init__(self, name, x):
