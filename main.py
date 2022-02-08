@@ -12,6 +12,10 @@ screen = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
 
 count = 10
+coffeecount = 0
+
+get_coffee = False
+is_alive = True
 
 
 def terminate():
@@ -30,6 +34,8 @@ def load_image(name, colorkey=None):
                                        (450, 1350))  # тут идет обрезка изображений, а то изначально они гигантские
     elif name == 'kofe1.png':
         image = pygame.transform.scale(image, (40, 40))
+    elif name == 'rectangle.png':
+        image = pygame.transform.scale(image, (150, 26))
     else:
         image = pygame.transform.scale(image, (80, 80))
     return image
@@ -63,6 +69,7 @@ def start_screen():
 
 
 class Player(pygame.sprite.Sprite):
+
     max_speed = 5
 
     def __init__(self):
@@ -75,6 +82,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.centery = HEIGHT / 2
 
     def update(self):
+        global get_coffee
+
         self.rect.x += self.max_speed
         if self.rect.x >= 450 - 80:
             self.max_speed = -self.max_speed
@@ -84,6 +93,7 @@ class Player(pygame.sprite.Sprite):
             self.image = pygame.transform.flip(self.image, True, False)
         if pygame.sprite.spritecollide(self, kofe_objects, False):
             pygame.sprite.spritecollide(self, kofe_objects, True)
+            get_coffee = True
 
 
 class Background(pygame.sprite.Sprite):
@@ -100,9 +110,9 @@ class Background(pygame.sprite.Sprite):
 
     def update(self):
         keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_UP]:
-            self.current_speed = self.max_speed
+        if is_alive:
+            if keys[pygame.K_UP]:
+                self.current_speed = self.max_speed
         self.current_speed -= 0.1
         self.rect.bottom += self.current_speed
 
@@ -129,19 +139,47 @@ class Kofe(pygame.sprite.Sprite):
         self.current_speed = -self.max_speed
 
     def update(self, count):
+        global is_alive
+        keys = pygame.key.get_pressed()
+        if is_alive:
+            if keys[pygame.K_UP]:
+                self.current_speed = self.max_speed
+            self.current_speed -= 0.1
+            self.rect.bottom += self.current_speed
+            for i in kofe_objects:
+                if i.rect.top >= 450:
+                    kofe_objects.remove(i)
+                    kofe_objects.add(Kofe(0, -450))
+            if count > len(list(kofe_objects)):
+                for i in range(count - len(list(kofe_objects))):
+                    kofe_objects.add(Kofe(0, -450))
+
+
+class RunningLine(pygame.sprite.Sprite):
+
+    def __init__(self):
+        super(RunningLine, self).__init__()
+
+        self.image = load_image('rectangle.png')
+        self.rect = self.image.get_rect()
+
+        self.rect.x = 5
+        self.rect.y = 400
+        self.speed = 2
+
+    def update(self):
+        global get_coffee, coffeecount, is_alive
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_UP]:
-            self.current_speed = self.max_speed
-        self.current_speed -= 0.1
-        self.rect.bottom += self.current_speed
-        for i in kofe_objects:
-            if i.rect.top >= 450:
-                kofe_objects.remove(i)
-                kofe_objects.add(Kofe(0, -450))
-        if count > len(list(kofe_objects)):
-            for i in range(count - len(list(kofe_objects))):
-                kofe_objects.add(Kofe(0, -450))
+        if get_coffee and is_alive:
+            self.rect.x = 5
+            self.rect.y = 400
+            get_coffee = False
+            coffeecount += 1
+        if self.rect.x < -150:
+            self.speed = 0
+            is_alive = False
+        self.rect.x -= self.speed
 
 
 running = True
@@ -149,6 +187,7 @@ start_screen()
 
 player = Player()
 background = Background()
+rl = RunningLine()
 
 all_objects = pygame.sprite.Group()
 kofe_objects = pygame.sprite.Group()
@@ -158,6 +197,8 @@ for i in range(count):
 
 all_objects.add(background)
 all_objects.add(player)
+all_objects.add(rl)
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
