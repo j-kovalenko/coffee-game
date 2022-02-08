@@ -11,7 +11,6 @@ screen = pygame.display.set_mode(SIZE)
 
 clock = pygame.time.Clock()
 
-count = 10
 coffeecount = 0
 
 get_coffee = False
@@ -36,7 +35,7 @@ def load_image(name, colorkey=None):
         image = pygame.transform.scale(image, (40, 40))
     elif name == 'rectangle.png':
         image = pygame.transform.scale(image, (150, 26))
-    else:
+    elif name == 'kofe.png':
         image = pygame.transform.scale(image, (80, 80))
     return image
 
@@ -154,6 +153,38 @@ class Kofe(pygame.sprite.Sprite):
                 for i in range(count - len(list(kofe_objects))):
                     kofe_objects.add(Kofe(0, -450))
 
+class Buttons(pygame.sprite.Sprite):
+    def __init__(self, name, x):
+        super(Buttons, self).__init__()
+
+        self.image = load_image(name)
+        self.rect = self.image.get_rect()
+
+        self.rect.x = x
+        self.rect.y = 385
+
+class Button_text(pygame.sprite.Sprite):
+    def __init__(self, x):
+        super(Button_text, self).__init__()
+
+        self.price = 10
+        intro_text = str(self.price)
+
+        font = pygame.font.Font(None, 70)
+        self.image = font.render(intro_text, True, [255, 255, 255])
+        self.rect = self.image.get_rect()
+
+        self.rect.x = x
+        self.rect.y = 400
+
+    def update(self):
+        self.price *= 1.5
+        self.price = int(self.price)
+        intro_text = str(self.price)
+
+        font = pygame.font.Font(None, 70)
+        self.image = font.render(intro_text, True, [255, 255, 255])
+
 
 class RunningLine(pygame.sprite.Sprite):
 
@@ -185,12 +216,26 @@ class RunningLine(pygame.sprite.Sprite):
 running = True
 start_screen()
 
+count = 10
+
 player = Player()
 background = Background()
 rl = RunningLine()
 
 all_objects = pygame.sprite.Group()
 kofe_objects = pygame.sprite.Group()
+
+button_count_coffee = pygame.sprite.Group()
+sprite = pygame.sprite.Sprite()
+sprite.image = load_image("status_bar.png")
+sprite.rect = sprite.image.get_rect()
+sprite.rect.bottom = 450
+button_count_coffee.add(sprite)
+
+btn1 = Buttons('btn1_count.png', 300)
+text1 = Button_text(320)
+button_count_coffee.add(btn1)
+button_count_coffee.add(text1)
 
 for i in range(count):
     kofe_objects.add(Kofe(0, 0))
@@ -203,12 +248,18 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if 300<=event.pos[0]<= 390 and 385<=event.pos[1]<=445:
+                count *= 1.5
+                count = int(count)
+                text1.update()
 
     all_objects.update()
     kofe_objects.update(count)
 
     all_objects.draw(screen)
     kofe_objects.draw(screen)
+    button_count_coffee.draw(screen)
 
     pygame.display.flip()
     clock.tick(25)
