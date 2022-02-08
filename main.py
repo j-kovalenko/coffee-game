@@ -41,34 +41,38 @@ def load_image(name, colorkey=None):
 
 
 def start_screen():
-    intro_text = ["Перемещение героя", "",
-                  "Герой двигается",
-                  "Карта на месте,"]
-
+    title = 'COFFEE GAME'
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('white'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
+    font = pygame.font.Font(None, 70)
+    string_rendered = font.render(title, True, pygame.Color('blue'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.centerx = 225
+    intro_rect.y = 100
+    screen.blit(string_rendered, intro_rect)
+
+    pygame.draw.rect(screen, 'azure', (50, 200, 350, 100))
+    pygame.draw.rect(screen, 'blue', (50, 200, 350, 100), width=5)
+
+    title = 'start'
+    font = pygame.font.Font(None, 70)
+    string_rendered = font.render(title, True, pygame.Color('blue'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.centerx = 225
+    intro_rect.y = 220
+    screen.blit(string_rendered, intro_rect)
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                return
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if 50 <= event.pos[0] <= 400 and 200 <= event.pos[1] <= 300:
+                    return
         pygame.display.flip()
 
 
 class Player(pygame.sprite.Sprite):
-
     max_speed = 5
 
     def __init__(self):
@@ -152,6 +156,7 @@ class Kofe(pygame.sprite.Sprite):
             for i in range(count - len(list(kofe_objects))):
                 kofe_objects.add(Kofe(0, -450))
 
+
 class Buttons(pygame.sprite.Sprite):
     def __init__(self, name, x):
         super(Buttons, self).__init__()
@@ -161,6 +166,7 @@ class Buttons(pygame.sprite.Sprite):
 
         self.rect.x = x
         self.rect.y = 385
+
 
 class Button_text(pygame.sprite.Sprite):
     def __init__(self, x):
@@ -235,26 +241,27 @@ btn1 = Buttons('btn1_count.png', 300)
 text1 = Button_text(320)
 button_count_coffee.add(btn1)
 button_count_coffee.add(text1)
+button_count_coffee.add(rl)
 
 for i in range(count):
     kofe_objects.add(Kofe(0, 0))
 
 all_objects.add(background)
 all_objects.add(player)
-all_objects.add(rl)
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if 300<=event.pos[0]<= 390 and 385<=event.pos[1]<=445:
+            if 300 <= event.pos[0] <= 390 and 385 <= event.pos[1] <= 445:
                 count *= 1.5
                 count = int(count)
                 text1.update()
 
     all_objects.update()
     kofe_objects.update(count)
+    rl.update()
 
     all_objects.draw(screen)
     kofe_objects.draw(screen)
