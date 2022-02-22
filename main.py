@@ -16,10 +16,23 @@ price_count_speed = 30
 count_kofe_on_field = 10
 price_count_coffee = 30
 coffee_count = 0
-count_level = 0
 
 get_coffee = False
 is_alive = True
+
+
+def restart():
+    global max_speed, price_count_speed, count_kofe_on_field, \
+        price_count_coffee, coffee_count, get_coffee, is_alive
+
+    max_speed = 7
+    price_count_speed = 30
+    count_kofe_on_field = 10
+    price_count_coffee = 30
+    coffee_count = 0
+
+    get_coffee = False
+    is_alive = True
 
 
 def terminate():
@@ -68,7 +81,7 @@ def start_screen():
     pygame.draw.rect(screen, (36, 221, 198), (50, 200, 350, 100))
     pygame.draw.rect(screen, (0, 4, 91), (50, 200, 350, 100), width=5)
 
-    title = 'start'
+    title = 'НАЧАТЬ'
     font = pygame.font.Font(None, 70)
     string_rendered = font.render(title, True, pygame.Color((0, 4, 91)))
     intro_rect = string_rendered.get_rect()
@@ -144,12 +157,8 @@ class Background(pygame.sprite.Sprite):
         self.rect.bottom += self.current_speed
 
         if self.rect.bottom >= 1350:
-            # global count_score
-            # count_score += 1
             self.rect.bottom = 900
         if self.rect.bottom <= 450:
-            # global count_score
-            # count_score -= 1
             self.rect.bottom = 900
 
 
@@ -164,11 +173,13 @@ class Kofe(pygame.sprite.Sprite):
         self.rect.y = (random.randint(y, y + 400))
 
         self.max_speed = max_speed
-        # self.count = count
 
         self.current_speed = -self.max_speed
 
-    def update(self, count):
+    def update(self, count, max_speed):
+        if max_speed != self.max_speed:
+            for i in kofe_objects:
+                i.change_speed(max_speed)
         keys = pygame.key.get_pressed()
         if is_alive:
             if keys[pygame.K_UP]:
@@ -182,6 +193,9 @@ class Kofe(pygame.sprite.Sprite):
                     kofe_objects.add(Kofe(0, -450, max_speed))
         self.current_speed -= 0.1
         self.rect.bottom += self.current_speed
+
+    def change_speed(self, speed):
+        self.max_speed = speed
 
 
 class Buttons(pygame.sprite.Sprite):
@@ -206,14 +220,11 @@ class Button_text(pygame.sprite.Sprite):
         self.image = font.render(intro_text, True, [255, 255, 255])
         self.rect = self.image.get_rect()
 
-        self.rect.x = x
+        self.rect.centerx = x
         self.rect.y = y
 
-    def update(self, count, x=None):
+    def update(self, count):
         intro_text = str(count)
-        if x:
-            self.rect.x = x
-        print(self.rect.x, x)
         font = pygame.font.Font(None, self.size)
         self.image = font.render(intro_text, True, [255, 255, 255])
 
@@ -233,13 +244,11 @@ class RunningLine(pygame.sprite.Sprite):
     def update(self):
         global is_alive
         global get_coffee
-        # global coffeecount
 
         if is_alive and get_coffee:
             self.rect.x = 5
             self.rect.y = 399
             get_coffee = False
-            # coffeecount += 1
         if self.rect.x < -150:
             self.speed = 0
             is_alive = False
@@ -267,6 +276,20 @@ class Count_Coffee(pygame.sprite.Sprite):
         self.image = font.render(intro_text, True, [0, 4, 91])
 
 
+class Retry(pygame.sprite.Sprite):
+    def __init__(self):
+        super(Retry, self).__init__()
+
+        intro_text = "Заново"
+
+        font = pygame.font.Font(None, 30)
+        self.image = font.render(intro_text, True, [0, 4, 91])
+        self.rect = self.image.get_rect()
+
+        self.rect.x = 12
+        self.rect.y = 8
+
+
 running = True
 start_screen()
 
@@ -274,6 +297,7 @@ player = Player(max_speed)
 background = Background(max_speed)
 rl = RunningLine()
 score = Count_Coffee(coffee_count)
+retry = Retry()
 
 all_objects = pygame.sprite.Group()
 kofe_objects = pygame.sprite.Group()
@@ -283,6 +307,7 @@ button_speed = pygame.sprite.Group()
 counter = pygame.sprite.Group()
 
 counter.add(score)
+counter.add(retry)
 
 sprite = pygame.sprite.Sprite()
 sprite.image = load_image("status_bar_bg.png")
@@ -298,16 +323,16 @@ status_bar_objects.add(sprite)
 
 btn1 = Buttons('btn1_count.png', 340)
 button_count_coffee.add(btn1)
-text1_1 = Button_text(count_kofe_on_field, 390, 393, 25)
+text1_1 = Button_text(count_kofe_on_field, 400, 393, 25)
 button_count_coffee.add(text1_1)
-text1_2 = Button_text(price_count_coffee, 366, 410, 50)
+text1_2 = Button_text(price_count_coffee, 373, 410, 50)
 button_count_coffee.add(text1_2)
 
 btn2 = Buttons('btn2_speed.png', 240)
 button_speed.add(btn2)
-text2_1 = Button_text(max_speed, 290, 393, 25)
+text2_1 = Button_text(max_speed, 300, 393, 25)
 button_speed.add(text2_1)
-text2_2 = Button_text(price_count_speed, 266, 410, 50)
+text2_2 = Button_text(price_count_speed, 273, 410, 50)
 button_speed.add(text2_2)
 
 all_objects.add(background)
@@ -328,26 +353,55 @@ while running:
                 count_kofe_on_field += 10
                 text1_1.update(count_kofe_on_field)
                 if count_kofe_on_field >= 70:
-                    text1_2.update('MAX', 325)
-                elif price_count_coffee // 100 > 0:
-                    text1_2.update(price_count_coffee, 325)
+                    text1_2.update('MAX')
                 else:
                     text1_2.update(price_count_coffee)
             if (240 <= event.pos[0] <= 326 and 385 <= event.pos[
-                1] <= 445 and is_alive and max_speed < 50 and coffee_count >= price_count_speed):
+                1] <= 445 and is_alive and max_speed < 16 and coffee_count >= price_count_speed):
                 coffee_count -= price_count_speed
                 price_count_speed *= 2
                 max_speed += 3
                 text2_1.update(max_speed)
-                if max_speed >= 50:
-                    text2_2.update('MAX', 225)
-                elif price_count_speed // 100 > 0:
-                    text2_2.update(price_count_speed, 225)
+                if max_speed >= 16:
+                    text2_2.update('MAX')
                 else:
                     text2_2.update(price_count_speed)
+            if 5 <= event.pos[0] <= 95 and 5 <= event.pos[1] <= 30:
+                dog_surf = load_image('fon_black.jpg')
+                dog_rect = dog_surf.get_rect(
+                    bottomright=(450, 450))
+                screen.blit(dog_surf, dog_rect)
+                pygame.display.update()
+                pygame.time.delay(100)
+
+                restart()
+
+                for i in status_bar_objects:
+                    status_bar_objects.remove(i)
+
+                sprite = pygame.sprite.Sprite()
+                sprite.image = load_image("status_bar_bg.png")
+                sprite.rect = sprite.image.get_rect()
+                sprite.rect.bottom = 450
+                status_bar_objects.add(sprite)
+                rl = RunningLine()
+                status_bar_objects.add(rl)
+                sprite = pygame.sprite.Sprite()
+                sprite.image = load_image("status_bar.png")
+                sprite.rect = sprite.image.get_rect()
+                sprite.rect.bottom = 450
+                status_bar_objects.add(sprite)
+
+                text1_1.update(count_kofe_on_field)
+                text1_2.update(price_count_coffee)
+                text2_1.update(max_speed)
+                text2_2.update(price_count_speed)
+
+                player.rect.centerx = WIDTH / 2
+                player.rect.centery = HEIGHT / 2
 
     all_objects.update(max_speed)
-    kofe_objects.update(count_kofe_on_field)
+    kofe_objects.update(count_kofe_on_field, max_speed)
     rl.update()
     counter.update(coffee_count)
 
@@ -356,6 +410,9 @@ while running:
     status_bar_objects.draw(screen)
     button_count_coffee.draw(screen)
     button_speed.draw(screen)
+
+    pygame.draw.rect(screen, (145, 192, 244), (5, 5, 90, 25))
+    pygame.draw.rect(screen, (0, 4, 91), (5, 5, 90, 25), width=2)
     counter.draw(screen)
 
     pygame.display.flip()
