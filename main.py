@@ -89,12 +89,83 @@ def start_screen():
     intro_rect.y = 220
     screen.blit(string_rendered, intro_rect)
 
+    title = 'Анекдот'
+    font = pygame.font.Font(None, 70)
+    string_rendered = font.render(title, True, pygame.Color((0, 4, 91)))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.centerx = 225
+    intro_rect.y = 335
+    start_x = intro_rect.x
+    delta_x = intro_rect.width
+    start_y = intro_rect.y
+    delta_y = intro_rect.height
+    screen.blit(string_rendered, intro_rect)
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if 50 <= event.pos[0] <= 400 and 200 <= event.pos[1] <= 300:
+                    return
+                elif start_x <= event.pos[0] <= start_x + delta_x and \
+                        start_y <= event.pos[1] <= start_y + delta_y:
+                    anekdot()
+        pygame.display.flip()
+
+
+def anekdot():
+    fon = pygame.transform.scale(load_image('fon_new.jpg'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    pygame.draw.rect(screen, (145, 192, 244), (0, 0, 450, 60))
+    pygame.draw.line(screen, (0, 4, 91), (0, 60), (450, 60), width=5)
+
+    font = pygame.font.Font(None, 70)
+    title = 'АНЕКДОТ'
+    string_rendered = font.render(title, True, pygame.Color((0, 4, 91)))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.centerx = 225
+    intro_rect.y = 10
+    screen.blit(string_rendered, intro_rect)
+
+    intro_text = [
+        'Когда я пришел в первый класс', 'и увидел предмет "Русский язык",', 'у меня появилось много вопросов.',
+        'Я подумал: "Йоу! Йоу!', 'Как скучно!', 'Давайте что-нибудь новенькое и посложнее".',
+        '',
+        'Потом оказалось, что в Русском', 'много новенького и сложненького.',
+        'Помните эти правила в старших классах?...', 'Типа, если вторая буква "Ы",', 'то первая всегда "Б".',
+        'Кроме тех случаев, когда третья "К".', 'Исключение слово "Бык".']
+
+    font = pygame.font.Font(None, 25)
+    text_coord = 80
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color((0, 4, 91)))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 5
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    pygame.draw.rect(screen, (145, 192, 244), (350, 415, 90, 25))
+    pygame.draw.rect(screen, (0, 4, 91), (350, 415, 90, 25), width=2)
+
+    intro_text = 'Назад'
+    font = pygame.font.Font(None, 30)
+    sprite = pygame.sprite.Sprite()
+    sprite.image = font.render(intro_text, True, [0, 4, 91])
+    sprite.rect = sprite.image.get_rect()
+    sprite.rect.x = 364
+    sprite.rect.y = 418
+    screen.blit(sprite.image, sprite.rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if 350 <= event.pos[0] <= 440 and 415 <= event.pos[1] <= 440:
+                    start_screen()
                     return
         pygame.display.flip()
 
@@ -136,7 +207,7 @@ class Background(pygame.sprite.Sprite):
     def __init__(self, max_speed):
         super(Background, self).__init__()
 
-        self.image = load_image('fon_new.jpg')
+        self.image = load_image('fon_4.jpg')
         self.rect = self.image.get_rect()
         self.rect.bottom = 900
 
@@ -375,6 +446,15 @@ while running:
                 pygame.time.delay(100)
 
                 restart()
+
+                player = Player(max_speed)
+                background = Background(max_speed)
+
+                for i in kofe_objects:
+                    kofe_objects.remove(i)
+
+                for i in range(count_kofe_on_field):
+                    kofe_objects.add(Kofe(0, 0, max_speed))
 
                 for i in status_bar_objects:
                     status_bar_objects.remove(i)
