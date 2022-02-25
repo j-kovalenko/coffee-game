@@ -4,7 +4,7 @@ import os
 import random
 
 pygame.init()
-pygame.display.set_caption("coffee_game")
+pygame.display.set_caption("Coffee game")
 
 SIZE = (WIDTH, HEIGHT) = (450, 450)
 screen = pygame.display.set_mode(SIZE)
@@ -40,6 +40,42 @@ def terminate():
     sys.exit()
 
 
+def fill_gradient(surface, color, gradient, rect=None, vertical=True, forward=True):
+    if rect is None: rect = surface.get_rect()
+    x1, x2 = rect.left, rect.right
+    y1, y2 = rect.top, rect.bottom
+    if vertical:
+        h = y2 - y1
+    else:
+        h = x2 - x1
+    if forward:
+        a, b = color, gradient
+    else:
+        b, a = color, gradient
+    rate = (
+        float(b[0] - a[0]) / h,
+        float(b[1] - a[1]) / h,
+        float(b[2] - a[2]) / h
+    )
+    fn_line = pygame.draw.line
+    if vertical:
+        for line in range(y1, y2):
+            color = (
+                min(max(a[0] + (rate[0] * (line - y1)), 0), 255),
+                min(max(a[1] + (rate[1] * (line - y1)), 0), 255),
+                min(max(a[2] + (rate[2] * (line - y1)), 0), 255)
+            )
+            fn_line(surface, color, (x1, line), (x2, line))
+    else:
+        for col in range(x1, x2):
+            color = (
+                min(max(a[0] + (rate[0] * (col - x1)), 0), 255),
+                min(max(a[1] + (rate[1] * (col - x1)), 0), 255),
+                min(max(a[2] + (rate[2] * (col - x1)), 0), 255)
+            )
+            fn_line(surface, color, (col, y1), (col, y2))
+
+
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
@@ -69,8 +105,8 @@ def load_image(name, colorkey=None):
 
 def start_screen():
     title = 'COFFEE GAME'
-    fon = pygame.transform.scale(load_image('fon_new.jpg'), (WIDTH, HEIGHT))
-    screen.blit(fon, (0, 0))
+    fill_gradient(screen, (32, 191, 85 ), (	1, 186, 239))
+
     font = pygame.font.Font(None, 70)
     string_rendered = font.render(title, True, pygame.Color((0, 4, 91)))
     intro_rect = string_rendered.get_rect()
