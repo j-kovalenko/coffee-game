@@ -10,5 +10,7 @@ inspired by [PolyMarsDev](https://github.com/PolyMarsDev)
 pip install pygame
 ```
 
+## presentation
+презентацию можно найти [здесь](https://1drv.ms/p/s!Au-xYdZmNjHZrR2Egc1N9feAJwOx?e=WUAfgS)
 ## authors
 сделали Сектименко Ирина и Стадник Пелагея
