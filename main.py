@@ -19,6 +19,9 @@ coffee_count = 0
 
 get_coffee = False
 is_alive = True
+mus = pygame.mixer.Sound("data/bgmusic.mp3")
+
+pygame.mixer.Sound.play(mus)
 
 
 def restart():
@@ -397,12 +400,31 @@ class Retry(pygame.sprite.Sprite):
         self.rect.y = 8
 
 
+class Music(pygame.sprite.Sprite):
+
+    def __init__(self):
+        super(Music, self).__init__()
+
+        self.image = load_image('play.svg')
+        self.rect = self.image.get_rect()
+
+        self.rect.x = 350
+        self.rect.y = -5
+
+    def update(self):
+        if mus_playing:  # play
+            self.image = load_image('play.svg')
+        else:
+            self.image = load_image('stop.svg')
+
+
 running = True
 start_screen()
 
 player = Player(max_speed)
 background = Background(max_speed)
 rl = RunningLine()
+ms = Music()
 score = Count_Coffee(coffee_count)
 retry = Retry()
 
@@ -445,6 +467,11 @@ button_speed.add(text2_2)
 all_objects.add(background)
 all_objects.add(player)
 
+status_bar_objects.add(ms)
+mus_playing = True
+
+pygame.mixer.Sound.play(mus)
+
 for i in range(count_kofe_on_field):
     kofe_objects.add(Kofe(0, 0, max_speed))
 
@@ -453,6 +480,14 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
+            if 380 <= event.pos[0] <= 430 and 0 <= event.pos[1] <= 50:
+                if not mus_playing:
+                    mus.set_volume(100)
+                    mus_playing = True
+                else:
+                    mus.set_volume(0)
+                    mus_playing = False
+                ms.update()
             if (340 <= event.pos[0] <= 426 and 385 <= event.pos[
                 1] <= 445 and is_alive and count_kofe_on_field < 70 and coffee_count >= price_count_coffee):
                 coffee_count -= price_count_coffee
